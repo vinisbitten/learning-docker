@@ -2,125 +2,151 @@
 
 # Docker
 
-Criação e administração de ambientes isolados.
+Creation and administration of isolated environments.
 
-**Summary:**
+> **Summary:**
+>
+> <details>
+> <summary>Basic concepts</summary>
+>
+> [What is Docker?](#p01)
+>
+> [Containers](#p02)
+>
+>* [Namespace](#t01)
+>* [CGroups](#t02)
+>* [Overlay File System](#t03)
+>* [So what actually is a Container?](#t04)
+>
+> [images](#p03)
+>
+> [dockerfile](#p04)
+>
+>[How Docker Works](#p05)
+>
+>* [Docker client](#t05)
+>* [Docker server](#t06)
+>* [Docker images](#t07)
+>* [Docker registry](#t08)
+>
+> [Comments](#p06)
+>
+> </details>
+>
+> <details>
+> <summary>Hands-on</summary>
+>
+> [First project](#p07)
+> Not done yet!!
+></details>
 
-[O que é docker](#p01)
+# Basic concepts
 
-[Containers](#p02)
+<h2 id="p01">What is Docker?</h2>
 
-* [Namespace](#t01)
-* [CGroups](#t02)
-* [Overlay File System](#t03)
-* [Conclusão container](#t04)
-
-[imagens](#p03)
-
-[dockerfile](#p04)
-
-[Como o Docker funciona](#p05)
-
-* [Cliente Docker](#t05)
-* [Servidor Docker](#t06)
-* [Imagens do Docker](#t07)
-* [Registro do Docker](#t08)
-
-[Observções](#p06)
-
-<h2 id="p01">O que é o docker</h2>
-
-o **Docker** é uma forma de virtualizar aplicações no conceito de “containers”, trazendo da web ou de seu repositório interno uma imagem completa, incluindo todas as dependências necessárias para executar sua aplicação.
+**Docker** is a way to virtualize applications in the concept of "containers", bringing a complete image from the web or its internal repository, including all the dependencies necessary to run your application.
 
 <h2 id="p02">Containers</h2>
 
-Para realmente entender o que é um container, primeiro precisamos entender: o sistema, os processos e os **três pilares de um container**.
+To really understand what a container is, we first need to understand: the system, the processes and the **three pillars of a container**.
 
 <p id="t01"></>
 
 1️⃣ **Namespace**
 
-Com a evolução dos processos de um sistema, fez-se necessário a criação de uma solução para manter os processos sob controle. Assim surgiram os **namespaces**, uma maneira de isolar processos uns dos outros, utilizando um processo como pai e diversos outros como filhos, criando **processos em cascata** isolados por escopo.
+With the evolution of the processes of a system, it was necessary to create a solution to keep the processes under control. Thus came the **namespaces**, a way to isolate processes from each other, using a process as a parent and several others as children, creating **cascading processes** isolated by scope.
 
-![Htop](src/htop.png)
-Htop em um sistema linux evidenciando os processos em cascata
+<div align="center">
+    <img src="src/htop.png" alt="htop-print" height="200"/>
+
+Htop on a linux system showing cascading processes
+
+</div>
 
 <p id="t02"></>
 
 2️⃣ **CGroups**
 
-Naturalmente processos muito grandes consomem muitos recursos e acabam atrapalhando outros processos, diante dessa necessidade foram criados os ****CGroups, **limitadores de recursos** do sistema para diferentes processos.
+Naturally, very large processes consume a lot of resources and end up disturbing other processes. In view of this need, CGroups were created, **resource limiters** of the system for different processes.
 
 <p id="t03"></>
 
 3️⃣ **Overlay File System**
 
-Sistema de organização que trabalha em camadas guardando as diferenças de uma versão de sistema para outra em vez de um sistema completo, **se aproveita dos recursos do sistema operacional**, como o prório kernel e bibliotecas.
+Organizational system that works in **layers keeping the differences** from one version of the system to another instead of building up a complete system, it takes advantage of the resources of the operating system, such as the kernel itself and libraries.
 
 <p id="t04"></>
 
-📦 Então, o que de fato é um **Container**?
+📦 So what actually is a **Container**?Tudo isso para ser **rápido** e **leve**.
 
-Um container é um **namespace que emula um sistema** operacional **limitado por um controlador** de recurso (cgroup) que utiliza **recursos de organização em camadas para ser** **leve**.
+* A container is a **namespace that emulates an operating system**
+* It is **constrained by resource controllers**
+* And utilizes **layering capabilities**
+* All this to be **fast** and **lightweight**.
 
-<h2 id="p03">Imagens</h2>
+<h2 id="p03">Images</h2>
 
-Imagens no contexto de containers, trabalham com **camadas de dependências** e essas dependências podem ser **usadas em diversas outras imagens** (mesmo esquema de overlay file system) permite correções isoladas nos pedaços das imagens. Normalmente as imagens têm um nome e uma versão. As **imagens são imutáveis**, as aleracões são feitas em uma camada de escrita e leitura.
+Images in the context of containers, work with **layers of dependencies** and these dependencies can be used in several other images.
+Images usually have a name and version. The **images are immutable**, the changes are made in a read and write layer.
+So you can **stack up images** and **make isolated corrections** in pieces of images.
 
-![Docker Image](src/docker-image.png)
+<div align="center">
+    <img src="src/docker-image.png" alt="docker-image-logic" height="300"/>
+</div>
 
 <h2 id="p04">Dockerfile</h2>
 
-Usado para **construir imagens**, são definidas as dependências que precisamos para a aplicação, quais portas serão expostas e também as custimozações necessárias.
+Used to **build images**, the dependencies we need for the application are defined, which ports will be exposed and also the necessary customizations.
 
-```docker
+```dockerfile
 FROM debian:latest
 
-# definir metadados à imagem
-	# sintaxe -- >  <chave>=<valor>
+# set metadata to image
+# syntax --> <key>=<value>
 LABEL maintainer="Vinícius Bittencourt <bittencourt1310@gmail.com>"
 LABEL build_date="2022-01-12"
 
-# códigos para customização da imagem
+# image customization commands
+# in this case we are installing nginx
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install nginx -y
 
-# expor portas
+# expose ports
 EXPOSE 80
 
-# comando para iniciar o NGINX no Container
+# command to start NGINX inside the container
 CMD ["nginx","-g","daemon off;"]
 ```
 
 ```bash
-# para construir o Dockerfile
-# no diretório do dockerfile 
-docker build -t [tag] [caminho]
+# terminal command to build the Dockerfile
+docker build -t [tag] [dockerfile directory path]
 ```
 
-<h2 id="p05">Como o Docker funciona</h2>
+<h2 id="p05">How Docker works</h2>
 
-![Docker Work](src/docker-work.png)
+<div align="center">
+    <img src="src/docker-work.png" alt="how-docker-work" height="300"/>
+</div>
 
 <p id="t05"></p>
 
-- **Cliente Docker**– o principal componente para criar, gerenciar e executar aplicativos em container. O cliente Docker é o principal método de controle do servidor Docker por meio de uma ILC, como Prompt de Comando (Windows) ou Terminal (macOS, Linux).
+* **Docker Client** – The main component for building, managing and running containerized applications. The Docker client is the primary method of controlling the Docker server through a CLI such as Command Prompt (Windows) or Terminal (macOS, Linux).
 
 <p id="t06"></p>
 
-- **Servidor Docker**– também conhecido como o daemon do Docker. Ele aguarda as solicitações da API REST feitas pelo cliente Docker e gerencia imagens e containers.
+* **Docker Server**– also known as the Docker daemon. It listens for REST API requests made by the Docker client and manages images and containers.
 
 <p id="t07"></p>
 
-- **Imagens do Docker**– instrua o servidor Docker com os requisitos sobre como criar um container Docker. As imagens podem ser baixadas de sites como **[Docker Hub](https://hub.docker.com/)**. A criação de uma imagem personalizada também é possível — para isso, os usuários precisam criar um Dockerfile e passá-lo para o servidor. Vale a pena notar que o Docker não limpa nenhuma imagem não utilizada, então os usuários precisam **[excluir dados de imagem](https://www.hostinger.com.br/tutoriais/como-usar-unzip-linux/)** eles mesmos, antes que acabe com muitas delas.
+* **Docker Images** – Instruct the Docker server with requirements on how to create a Docker container. Images can be downloaded from sites like **[Docker Hub](https://hub.docker.com/)**. Creating a custom image is also possible — for this, users need to create a Dockerfile and pass it to the server. It's worth noting that Docker doesn't clean up any unused images, so users need to **delete image data** themselves before it wipes out too many of them.
 
 <p id="t08"></p>
 
-- **Registro do Docker**– um aplicativo do lado do servidor de código aberto usado para hospedar e distribuir imagens do Docker. O registro é extremamente útil para armazenar imagens localmente e manter controle total sobre elas. Como alternativa, os usuários podem acessar o Docker Hub mencionado acima – o maior repositório mundial de imagens do Docker.
+* **Docker Registry** – An open source server-side application used to host and distribute Docker images. Registry is extremely useful for storing images locally and maintaining full control over them. Alternatively, users can access the aforementioned Docker Hub – the world's largest repository of Docker images.
 
-<h2 id="p06">Observções</h2>
+<h2 id="p06">Comments</h2>
 
-- Existem duas maneiras de se construir uma imagem, por dockerfile ou por commit.
-- As imagens são guardadas em um **Image Registry**, repositório de imagens.
-    - O FROM no dockerfile faz um **pull** nesse repositório
-    - O build faz um **push**
+* There are two ways to build an image, by dockerfile or by commit.
+* Images are stored in an **Image Registry**, local image repository.
+* When we use FROM debian:latest in the dockerfile, we are actually **pulling** the debian repository
