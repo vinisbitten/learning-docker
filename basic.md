@@ -1,65 +1,3 @@
-![Docker banner](src/docker-banner.png)
-
-# Docker
-
-Creation and administration of isolated environments.
-
-> <br>
->
-> **Summary:**
->
-> [comment]: <> (B A S I C   C O N C E P T S)
->
-> <details>
-> <summary>Basic concepts</summary>
->
-> [What is Docker?](#p01)
->
-> [Containers](#p02)
->
->* [Namespace](#t01)
->* [CGroups](#t02)
->* [Overlay File System](#t03)
->* [So what actually is a Container?](#t04)
->
-> [images](#p03)
->
-> [dockerfile](#p04)
->
->[How Docker Works](#p05)
->
->* [Docker client](#t05)
->* [Docker server](#t06)
->* [Docker images](#t07)
->* [Docker registry](#t08)
->
-> [Comments](#p06)
->
-> </details>
->
-> [comment]: <> (W O R K I N G   W I T H    I M A G E S)
->
-> <details>
-> <summary>Working with images</summary>
->
-> 
->
->
->
-> </details>
->
->[comment]: <> (H A N D S - O N)
->
-> <details>
-> <summary>Hands-on</summary>
->
->
->
-> </details>
-> <br>
-
-<br>
-
 # Basic concepts
 
 <h2 id="p01">What is Docker?</h2>
@@ -170,7 +108,3 @@ docker build -t [tag] [dockerfile directory path]
 * There are two ways to build an image, by dockerfile or by commit.
 * Images are stored in an **Image Registry**, local image repository.
 * When we use FROM debian:latest in the dockerfile, we are actually **pulling** the debian repository
-
-# Working with images
-
-# Hands-on
