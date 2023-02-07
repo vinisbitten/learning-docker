@@ -1,0 +1,15 @@
+FROM node:latest
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "node", "index.js" ]
+
+# for first build, dont forget to use:
+# npm init
+# npm install express --save
+
+# docker build -t [tag] . -f dockerfile.prod

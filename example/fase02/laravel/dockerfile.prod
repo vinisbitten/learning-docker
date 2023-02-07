@@ -1,0 +1,32 @@
+FROM php:cli AS builder
+
+WORKDIR /var/www
+
+RUN apt-get update && \
+    apt-get install libzip-dev -y && \
+    docker-php-ext-install zip
+
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+    php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
+    php composer-setup.php && \
+    php -r "unlink('composer-setup.php');"
+
+RUN php composer.phar create-project laravel/laravel laravel --prefer-dist
+
+FROM php:fpm-alpine
+
+WORKDIR /var/www
+
+RUN rm -rf /var/www/laravel
+
+COPY --from=builder /var/www/laravel .
+
+RUN ln -s public html && \
+    chown -R www-data:www-data /var/www/
+
+EXPOSE 9000
+
+CMD [ "php-fpm" ]
+
+# multi-stage build
+# docker build -t [tag] . -f dockerfile.[name]

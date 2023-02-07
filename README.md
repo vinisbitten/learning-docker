@@ -4,6 +4,8 @@
 
 Creation and administration of isolated environments.
 
+# host.docker.internal:[porta docker host]
+
 > **Summary:**
 >
 > <details>
@@ -36,8 +38,12 @@ Creation and administration of isolated environments.
 > <details>
 > <summary>Hands-on</summary>
 >
-> [First project](#p07)
-> Not done yet!!
+> [Examples](#p07)
+>
+>* [Fase 01](#t09)
+>* [Fase 02](#t10)
+>* [Fase 03](#t11)
+>
 ></details>
 
 # Basic concepts
@@ -150,3 +156,102 @@ docker build -t [tag] [dockerfile directory path]
 * There are two ways to build an image, by dockerfile or by commit.
 * Images are stored in an **Image Registry**, local image repository.
 * When we use FROM debian:latest in the dockerfile, we are actually **pulling** the debian repository
+
+# Hands-on
+
+<h2 id="p07">example</h2>
+
+By the end of this module, we will be creating an application that communicates with a database and a web UI with a reverse proxy, all dockerized!
+
+<h3 id="t09">Fase 01</h3>
+
+* <a href="example/fase01/">Here</a> we learn dockerfile basics by running a laravel server and playing with node.
+* You can build the images and up then to your docker hub!
+
+Working with **multiple dockerfiles**:
+
+* In this project you will see some folders tha contains more than one dockerfile
+* To propperly build then use the syntax above
+
+```bash
+# name in our case file name is dockerfile.prod
+docker build -t [tag] . -f [file name]
+```
+
+**Laravel** commands:
+
+```bash
+# basic build command
+docker build -t [tag] .
+
+# basic run command [name] 
+docker run -it --name [name] -p [host port]:[container port] [tag]
+# (for example)
+docker run -it --name laravel -p 8000:8000 [tag]
+# then, in your web browser, go to localhost:8000
+# you should see the laravel page
+
+# Entrypoint can't be overriden!!
+# CMD can be overriden!!
+
+# (changing port to 8001 by altering CMD for example)
+docker run -it --name laravel -p 8001:8001 vinisbitten/laravel --host=0.0.0.0 --port=8001
+# then, in your web browser, go to localhost:8001
+# you should see the laravel page
+```
+
+Pushing to **docker hub** example:
+
+```bash
+# first you have to login
+docker login
+
+# then push the image
+docker push [image tag]
+
+# to test, simplt remove the image from local image registry
+docker rmi [image tag]
+
+# then run the image
+docker run -it --name [name] [image tag]
+```
+
+Playing with **node**:
+
+* In this step we will use the node packge express without directly installing it in the container and without having node in the local machine
+* The package will exhibit us a html page
+* To do this we will install express localy and copy it's files to the container
+* So for the first time running it you have to get the dependencies of the project
+* This is to get knowledge on how to develop inside a container using local files and in the next fases work wth volumes
+
+```bash
+# To do so we will run a node image node
+# -rm removes image after we're finished
+# -it habilitates interactive mode
+# -v maps a local volume to a container volume
+docker run --rm -it -v $(pwd)/:/usr/src/app -p 3000:3000 node bash
+
+# go to mapped volume
+cd /usr/src/app
+
+# install dependencies
+npm init -y
+npm install express --save
+
+# you will notice that the dependencies are in the node folder
+exit
+```
+
+* Now build the prod dockerfile
+* Run the image and go to localhost:3000
+* You should see your index.js response
+
+>
+> <h3 id="t10">Fase 02</h3>
+> 
+> <a href="example/fase02/">test</a>
+>
+> ---
+> <h3 id="t11">Fase 03</h3>
+>
+> <a href="example/fase03/">test</a>

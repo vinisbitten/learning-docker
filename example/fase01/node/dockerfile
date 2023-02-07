@@ -1,0 +1,15 @@
+FROM node:latest
+
+# sets a working directory inside the container
+WORKDIR /usr/src/app
+
+# copies every file from the current directory to the container
+COPY . .
+
+# exposes the port 3000
+EXPOSE 3000
+
+CMD [ "node", "index.js" ]
+
+# Working with 2 or more dockerfiles
+# You won't build this image!! Build the production image instead!!

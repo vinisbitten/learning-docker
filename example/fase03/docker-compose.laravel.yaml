@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: dockerfile.prod
+    image: vinisbitten/laravel:prod
+    container_name: laravel
+    networks:
+      - laranet
+  
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: dockerfile.prod
+    image: vinisbitten/nginx:prod
+    container_name: nginx
+    ports:
+      - "8080:80"
+    networks:
+      - laranet
+
+  
+
+networks:
+  laranet: {}

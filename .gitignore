@@ -1,3 +1,6 @@
 .idea/
 go.sum
 go.work.sum
+node_modules/
+*.json
+example/fase03/mysql/*
