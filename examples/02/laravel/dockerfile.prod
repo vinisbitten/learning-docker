@@ -1,3 +1,4 @@
+# use cli image to install composer and laravel
 FROM php:cli AS builder
 
 WORKDIR /var/www
@@ -13,17 +14,18 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 RUN php composer.phar create-project laravel/laravel laravel --prefer-dist
 
+# use alpine to get a smaller image and run php-fpm
 FROM php:fpm-alpine
 
 WORKDIR /var/www
 
-RUN rm -rf /var/www/laravel
+RUN rm -rf /var/www/html
 
+# copy the laravel folder from the builder image
 COPY --from=builder /var/www/laravel .
 
-RUN ln -s public html && \
-    chown -R www-data:www-data /var/www/
-
+RUN chown -R www-data:www-data /var/www/
+RUN ln -s public html
 EXPOSE 9000
 
 CMD [ "php-fpm" ]

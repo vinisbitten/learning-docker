@@ -10,7 +10,7 @@ services:
     container_name: laravel
     networks:
       - laranet
-  
+
   nginx:
     build:
       context: ./nginx
@@ -21,8 +21,6 @@ services:
       - "8080:80"
     networks:
       - laranet
-
-  
 
 networks:
   laranet: {}

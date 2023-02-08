@@ -4,8 +4,6 @@
 
 Creation and administration of isolated environments.
 
-> <br>
->
 > **Summary:**
 >
 > [comment]: <> (B A S I C   C O N C E P T S)
@@ -34,17 +32,6 @@ Creation and administration of isolated environments.
 >* [Docker registry](#t08)
 >
 > [Comments](#p06)
->
-> </details>
->
-> [comment]: <> (W O R K I N G   W I T H    I M A G E S)
->
-> <details>
-> <summary>Working with images</summary>
->
->
->
->
 >
 > </details>
 >
@@ -180,7 +167,7 @@ By the end of this module, we will be creating an application that communicates 
 
 <h3 id="t09">Fase 01</h3>
 
-* <a href="example/fase01/">Here</a> we learn dockerfile basics by running a laravel server and playing with node.
+* <a href="examples/01/">Here</a> we learn dockerfile basics by running a laravel server and playing with node.
 * You can build the images and up then to your docker hub!
 
 Working with **multiple dockerfiles**:
@@ -261,12 +248,137 @@ exit
 * Run the image and go to localhost:3000
 * You should see your index.js response
 
->
-> <h3 id="t10">Fase 02</h3>
-> 
-> <a href="example/fase02/">test</a>
->
-> ---
-> <h3 id="t11">Fase 03</h3>
->
-> <a href="example/fase03/">test</a>
+<h3 id="t10">Fase 02</h3>
+
+* <a href="examples/02/">Here</a> we learn how to create multistage building dockerfile and optimize our images in general.
+* Since docker is layer based, we can use multiple images to build our final image.
+* We also use a docker network to make the containers communicate
+
+understanding **networks**:
+* A network is a virtual bridge that allows containers to communicate with each other
+* By default, all containers are connected to a bridge network called **bridge**
+* To create a network use the command below
+```bash
+docker network create [network name]
+```
+
+Optimizing **images**:
+
+* In the laravel dockerfile.prod we use cli version of php to install dependencies and then copy the files to the final image to get a smaller image
+* We use nginx as a reverse proxy to serve our laravel application and adapt it to use the laravel server
+
+Run the **containers**:
+
+* After building and running the containers, go to localhost:8080
+* You should see the laravel page
+
+```bash
+# First create a network
+docker network create [network name]
+
+# Then build the images
+docker build -t [nginx tag] nginx -f nginx/dockerfile.prod
+
+docker build -t [laravel tag] laravel -f laravel/dockerfile.prod
+
+# Then run the containers
+docker run --network [network name] --name laravel -d [laravel tag]
+
+docker run --network [network name] --name nginx -d -p 8080:80 [nginx tag]
+
+# To check if the containers are running
+docker ps
+```
+
+<h3 id="t11">Fase 03</h3>
+
+* <a href="examples/03/">Here</a> we'll learn how to use docker-compose and make a node application communicate with a mysql database on docker using docker network
+* We'll also learn how to use dockerize to wait for a container to be ready before starting another one
+
+working with **docker-compose**:
+
+* docker-compose is a tool that allows us to run multiple containers at once
+* As default, it will look for a file called docker-compose.yaml, but we can specify the file we want to use
+* Some interesting commands:
+
+```bash
+# To run the containers (in the same folder as the docker-compose.yaml)
+docker-compose up -d
+
+# To specify the file -> interesting when you have multiple docker-compose files
+docker-compose -f [file name] up -d
+
+# To stop all containers
+docker-compose stop
+
+# To stop a specific container
+docker-compose stop [container name]
+```
+
+**Dockerize**:
+
+* Dockerize is a tool that allows us to wait for a container to be ready before starting another one
+* It's very useful when you have a container that depends on another one to be ready
+* You can use it in the entrypoint of the container
+
+```bash
+#First you have to install dockerize in the container (node dockerfile for example has it installed)
+
+# Then you change the entrypoint of the container to dockerize (check "app" service in docker-compose.yaml)
+
+# The command will be something like this:
+dockerize -wait tcp://[container name]:[port] -timeout [timeout in seconds]
+```
+
+Making the **containers** communicate:
+
+* To make the node application communicate with the mysql database we have to create a network
+* We also have to specify the network in the for each container since they can use multiple networks
+* It's all done in the docker-compose.yaml file
+* A simple example:
+
+```docker-compose
+version: 'x'
+
+services:
+  a:
+    image: x
+    container_name: a
+    # specify the network
+    networks:
+      - app-network
+      - backend-network
+
+  b:
+    build: y
+    container_name: b
+    ports:
+      - 3000:3000
+    # specify the network
+    networks:
+      - app-network
+
+# create a bridge network
+networks:
+    app-network: {}
+    backend-network: {}
+```
+
+```bash
+# 
+
+docker exec db bash
+
+* mysql -uroot -p
+* root
+* show databases;
+* use nodedb;
+* create table people(id int not null auto_increment, name varchar(255), primary key(id));
+* desc people;
+* select * from people;
+* select * from people; --> again after runnin index.js in node container
+
+
+docker exec app bash
+
+* node index.js
