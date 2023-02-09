@@ -299,6 +299,8 @@ working with **docker-compose**:
 
 * docker-compose is a tool that allows us to run multiple containers at once
 * As default, it will look for a file called docker-compose.yaml, but we can specify the file we want to use
+* You might want to take a look at the docker-compose.laravel.yaml file
+* It's a docker-compose file that runs the same containers as the fase02 example
 * Some interesting commands:
 
 ```bash
@@ -320,6 +322,7 @@ docker-compose stop [container name]
 * Dockerize is a tool that allows us to wait for a container to be ready before starting another one
 * It's very useful when you have a container that depends on another one to be ready
 * You can use it in the entrypoint of the container
+* In this fase we also have the fase02 containers been run by docker-compose
 
 ```bash
 #First you have to install dockerize in the container (node dockerfile for example has it installed)
@@ -327,13 +330,13 @@ docker-compose stop [container name]
 # Then you change the entrypoint of the container to dockerize (check "app" service in docker-compose.yaml)
 
 # The command will be something like this:
-dockerize -wait tcp://[container name]:[port] -timeout [timeout in seconds]
+dockerize -wait tcp://[container name]:[port]
 ```
 
 Making the **containers** communicate:
 
 * To make the node application communicate with the mysql database we have to create a network
-* We also have to specify the network in the for each container since they can use multiple networks
+* We also have to specify the network for each container since they can use multiple networks
 * It's all done in the docker-compose.yaml file
 * A simple example:
 
@@ -358,27 +361,65 @@ services:
     networks:
       - app-network
 
-# create a bridge network
+# create networks
 networks:
     app-network: {}
     backend-network: {}
 ```
 
-```bash
-# 
+mysql and node **project**:
 
+* We'll create a simple node application that connects to a mysql database
+* We'll manually create a table called "people" (to get used to executing commands in the mysql container)
+* Then we'll run the node application that will insert a new person in the table
+* First we have to run the containers using docker-compose
+
+```bash
+# In the project folder
+docker-compose up -d
+```
+
+* Since we already created the database in the mysql container, we just have to create the table
+* To do so we have to connect to the mysql container and run these commands
+
+```bash
+# to connect to the mysql container
 docker exec db bash
 
-* mysql -uroot -p
-* root
-* show databases;
-* use nodedb;
-* create table people(id int not null auto_increment, name varchar(255), primary key(id));
-* desc people;
-* select * from people;
-* select * from people; --> again after runnin index.js in node container
+# inside the container
 
+# login to mysql
+# password is set in the docker-compose file
+mysql -uroot -p
+# insert the password
 
+# inside mysql --> list databases
+show databases;
+# use the database we created in the docker-compose file
+use nodedb;
+# create table
+create table people(id int not null auto_increment, name varchar(255), primary key(id));
+# confirm table creation
+desc people;
+select * from people; #--> should be empty
+```
+
+* Now we can run the node application
+* To do so we have to connect to the node container and run the index.js file
+* It's easier to open a new terminal and run the commands there since we will get back to the mysql container
+
+```bash
+# to connect to the node container
 docker exec app bash
 
-* node index.js
+# inside the container
+
+# run the index.js file
+node index.js
+```
+
+* Now we can check if the person was inserted in the table
+
+```bash
+select * from people; # --> should have one person
+```
